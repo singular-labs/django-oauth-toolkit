@@ -6,7 +6,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.exceptions import SuspiciousOperation
 from django.test import RequestFactory, TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.views.generic import View
 from oauthlib.oauth2 import BackendApplicationServer
 

@@ -8,7 +8,7 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from jwcrypto import jwt

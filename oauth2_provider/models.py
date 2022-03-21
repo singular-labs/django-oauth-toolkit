@@ -2,13 +2,13 @@ import logging
 import time
 import uuid
 from datetime import timedelta
-from urllib.parse import parse_qsl, urlparse
+import sys
 
 from django.apps import apps
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jwcrypto import jwk
@@ -19,6 +19,12 @@ from .generators import generate_client_id, generate_client_secret
 from .scopes import get_scopes_backend
 from .settings import oauth2_settings
 from .validators import RedirectURIValidator, WildcardSet
+
+PY2 = sys.version_info[0] == 2
+if PY2:
+    from urlparse import parse_qsl, urlparse
+else:
+    from urllib.parse import parse_qsl, urlparse
 
 
 logger = logging.getLogger(__name__)
@@ -74,7 +80,7 @@ class AbstractApplication(models.Model):
         (HS256_ALGORITHM, _("HMAC with SHA-2 256")),
     )
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     client_id = models.CharField(max_length=100, unique=True, default=generate_client_id, db_index=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -243,7 +249,7 @@ class AbstractGrant(models.Model):
     CODE_CHALLENGE_S256 = "S256"
     CODE_CHALLENGE_METHODS = ((CODE_CHALLENGE_PLAIN, "plain"), (CODE_CHALLENGE_S256, "S256"))
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s"
     )
@@ -303,7 +309,7 @@ class AbstractAccessToken(models.Model):
     * :attr:`scope` Allowed scopes
     """
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -416,7 +422,7 @@ class AbstractRefreshToken(models.Model):
     * :attr:`revoked` Timestamp of when this refresh token was revoked
     """
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="%(app_label)s_%(class)s"
     )
@@ -486,7 +492,7 @@ class AbstractIDToken(models.Model):
     * :attr:`updated` Date and time of token update, in DateTime format
     """
 
-    id = models.BigAutoField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -631,7 +637,8 @@ def clear_expired():
             flat_queryset = queryset.values_list("id", flat=True)[:CLEAR_EXPIRED_TOKENS_BATCH_SIZE]
             batch_length = flat_queryset.count()
             queryset.model.objects.filter(id__in=list(flat_queryset)).delete()
-            logger.debug(f"{batch_length} tokens deleted, {current_no-batch_length} left")
+            temp_result = current_no - batch_length
+            logger.debug("{batch_length} tokens deleted, {temp_result} left".format(locals()))
             queryset = queryset.model.objects.filter(query)
             time.sleep(CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL)
             current_no = queryset.count()

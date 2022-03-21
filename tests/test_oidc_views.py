@@ -1,6 +1,6 @@
 import pytest
 from django.test import TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 
 from oauth2_provider.oauth2_validators import OAuth2Validator
 

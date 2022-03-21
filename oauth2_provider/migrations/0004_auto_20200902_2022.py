@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='IDToken',
             fields=[
-                ('id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('id', models.AutoField(primary_key=True, serialize=False)),
                 ("jti", models.UUIDField(unique=True, default=uuid.uuid4, editable=False, verbose_name="JWT Token ID")),
                 ('expires', models.DateTimeField()),
                 ('scope', models.TextField(blank=True)),

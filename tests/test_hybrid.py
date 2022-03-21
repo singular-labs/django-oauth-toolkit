@@ -6,7 +6,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from django.utils import timezone
 from jwcrypto import jwt
 from oauthlib.oauth2.rfc6749 import errors as oauthlib_errors

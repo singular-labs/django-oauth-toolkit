@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.urls import reverse
+from django.core.urlresolvers import reverse
 from jwcrypto import jwt
 
 from oauth2_provider.models import get_application_model
