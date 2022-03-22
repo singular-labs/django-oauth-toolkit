@@ -14,7 +14,7 @@ log = logging.getLogger("oauth2_provider")
 SAFE_HTTP_METHODS = ["GET", "HEAD", "OPTIONS"]
 
 
-class OAuthLibMixin:
+class OAuthLibMixin(object):
     """
     This mixin decouples Django OAuth Toolkit from OAuthLib.
 
@@ -201,7 +201,7 @@ class OAuthLibMixin:
         return core.authenticate_client(request)
 
 
-class ScopedResourceMixin:
+class ScopedResourceMixin(object):
     """
     Helper mixin that implements "scopes handling" behaviour
     """
@@ -232,13 +232,13 @@ class ProtectedResourceMixin(OAuthLibMixin):
     def dispatch(self, request, *args, **kwargs):
         # let preflight OPTIONS requests pass
         if request.method.upper() == "OPTIONS":
-            return super().dispatch(request, *args, **kwargs)
+            return super(ProtectedResourceMixin, self).dispatch(request, *args, **kwargs)
 
         # check if the request is valid and the protected resource may be accessed
         valid, r = self.verify_request(request)
         if valid:
             request.resource_owner = r.user
-            return super().dispatch(request, *args, **kwargs)
+            return super(ProtectedResourceMixin, self).dispatch(request, *args, **kwargs)
         else:
             return HttpResponseForbidden()
 
@@ -261,7 +261,7 @@ class ReadWriteScopedResourceMixin(ScopedResourceMixin, OAuthLibMixin):
                 ' to be in OAUTH2_PROVIDER["SCOPES"] list in settings'.format(read_write_scopes)
             )
 
-        return super().__new__(cls, *args, **kwargs)
+        return super(ReadWriteScopedResourceMixin, self).__new__(cls, *args, **kwargs)
 
     def dispatch(self, request, *args, **kwargs):
         if request.method.upper() in SAFE_HTTP_METHODS:
@@ -269,10 +269,10 @@ class ReadWriteScopedResourceMixin(ScopedResourceMixin, OAuthLibMixin):
         else:
             self.read_write_scope = oauth2_settings.WRITE_SCOPE
 
-        return super().dispatch(request, *args, **kwargs)
+        return super(ReadWriteScopedResourceMixin, self).dispatch(request, *args, **kwargs)
 
     def get_scopes(self, *args, **kwargs):
-        scopes = super().get_scopes(*args, **kwargs)
+        scopes = super(ReadWriteScopedResourceMixin, self).get_scopes(*args, **kwargs)
 
         # this returns a copy so that self.required_scopes is not modified
         return scopes + [self.read_write_scope]
@@ -288,7 +288,7 @@ class ClientProtectedResourceMixin(OAuthLibMixin):
     def dispatch(self, request, *args, **kwargs):
         # let preflight OPTIONS requests pass
         if request.method.upper() == "OPTIONS":
-            return super().dispatch(request, *args, **kwargs)
+            return super(ClientProtectedResourceMixin, self).dispatch(request, *args, **kwargs)
         # Validate either with HTTP basic or client creds in request body.
         # TODO: Restrict to POST.
         valid = self.authenticate_client(request)
@@ -298,13 +298,13 @@ class ClientProtectedResourceMixin(OAuthLibMixin):
             valid, r = self.verify_request(request)
             if valid:
                 request.resource_owner = r.user
-                return super().dispatch(request, *args, **kwargs)
+                return super(ClientProtectedResourceMixin, self).dispatch(request, *args, **kwargs)
             return HttpResponseForbidden()
         else:
-            return super().dispatch(request, *args, **kwargs)
+            return super(ClientProtectedResourceMixin, self).dispatch(request, *args, **kwargs)
 
 
-class OIDCOnlyMixin:
+class OIDCOnlyMixin(object):
     """
     Mixin for views that should only be accessible when OIDC is enabled.
 
@@ -325,4 +325,4 @@ class OIDCOnlyMixin:
                 raise ImproperlyConfigured(self.debug_error_message)
             log.warning(self.debug_error_message)
             return HttpResponseNotFound()
-        return super().dispatch(*args, **kwargs)
+        return super(OIDCOnlyMixin, self).dispatch(*args, **kwargs)

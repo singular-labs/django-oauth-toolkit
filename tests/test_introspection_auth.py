@@ -47,7 +47,7 @@ def mocked_requests_post(url, data, *args, **kwargs):
     Mock the response from the authentication server
     """
 
-    class MockResponse:
+    class MockResponse(object):
         def __init__(self, json_data, status_code):
             self.json_data = json_data
             self.status_code = status_code

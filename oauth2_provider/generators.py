@@ -4,7 +4,7 @@ from oauthlib.common import generate_client_id as oauthlib_generate_client_id
 from .settings import oauth2_settings
 
 
-class BaseHashGenerator:
+class BaseHashGenerator(object):
     """
     All generators should extend this class overriding `.hash()` method.
     """

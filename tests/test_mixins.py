@@ -24,12 +24,12 @@ class BaseTest(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.request_factory = RequestFactory()
-        super().setUpClass()
+        super(BaseTest, self).setUpClass()
 
 
 class TestOAuthLibMixin(BaseTest):
     def test_missing_oauthlib_backend_class_uses_fallback(self):
-        class CustomOauthLibBackend:
+        class CustomOauthLibBackend(object):
             def __init__(self, *args, **kwargs):
                 pass
 
@@ -46,7 +46,7 @@ class TestOAuthLibMixin(BaseTest):
         self.assertTrue(isinstance(core, CustomOauthLibBackend))
 
     def test_missing_server_class_uses_fallback(self):
-        class CustomServer:
+        class CustomServer(object):
             def __init__(self, *args, **kwargs):
                 pass
 
@@ -63,7 +63,7 @@ class TestOAuthLibMixin(BaseTest):
         self.assertTrue(isinstance(core.server, CustomServer))
 
     def test_missing_validator_class_uses_fallback(self):
-        class CustomValidator:
+        class CustomValidator(object):
             pass
 
         self.oauth2_settings.OAUTH2_VALIDATOR_CLASS = CustomValidator
@@ -91,7 +91,7 @@ class TestOAuthLibMixin(BaseTest):
         self.assertIsInstance(test_view.get_server(), Server)
 
     def test_custom_backend(self):
-        class AnotherOauthLibBackend:
+        class AnotherOauthLibBackend(object):
             pass
 
         class TestView(OAuthLibMixin, View):

@@ -1,6 +1,5 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.forms.models import modelform_factory
-from django.urls import reverse_lazy
+from ..compat import LoginRequiredMixin, reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from ..models import get_application_model
@@ -43,7 +42,7 @@ class ApplicationRegistration(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        return super(ApplicationRegistration, self).form_valid(form)
 
 
 class ApplicationDetail(ApplicationOwnerIsUserMixin, DetailView):

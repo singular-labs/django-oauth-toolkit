@@ -2,7 +2,7 @@ from django.contrib.auth import authenticate
 from django.utils.cache import patch_vary_headers
 
 
-class OAuth2TokenMiddleware:
+class OAuth2TokenMiddleware(object):
     """
     Middleware for OAuth2 user authentication
 

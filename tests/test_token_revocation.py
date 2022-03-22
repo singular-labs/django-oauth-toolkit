@@ -2,9 +2,9 @@ import datetime
 
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.core.urlresolvers import reverse
 from django.utils import timezone
 
+from oauth2_provider.compat import reverse
 from oauth2_provider.models import get_access_token_model, get_application_model, get_refresh_token_model
 
 

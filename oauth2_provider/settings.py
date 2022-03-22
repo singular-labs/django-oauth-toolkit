@@ -20,7 +20,7 @@ from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpRequest
 from django.test.signals import setting_changed
-from django.core.urlresolvers import reverse
+from .compat import reverse
 from django.utils.module_loading import import_string
 from oauthlib.common import Request
 
@@ -169,7 +169,7 @@ class _PhonyHttpRequest(HttpRequest):
         return self._scheme
 
 
-class OAuth2ProviderSettings:
+class OAuth2ProviderSettings(object):
     """
     A settings object, that allows OAuth2 Provider settings to be accessed as properties.
 

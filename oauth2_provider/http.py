@@ -15,7 +15,7 @@ class OAuth2ResponseRedirect(HttpResponse):
     status_code = 302
 
     def __init__(self, redirect_to, allowed_schemes, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(OAuth2ResponseRedirect, self).__init__(*args, **kwargs)
         self["Location"] = iri_to_uri(redirect_to)
         self.allowed_schemes = allowed_schemes
         self.validate_redirect(redirect_to)

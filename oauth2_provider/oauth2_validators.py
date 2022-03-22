@@ -1,13 +1,11 @@
 import base64
 import binascii
-import http.client
 import inspect
 import json
 import logging
 import uuid
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from urllib.parse import unquote_plus
 
 import requests
 from django.conf import settings
@@ -24,8 +22,9 @@ from jwcrypto import jws, jwt
 from jwcrypto.common import JWException
 from jwcrypto.jwt import JWTExpired
 from oauthlib.oauth2.rfc6749 import utils
-from oauthlib.openid import RequestValidator
+from oauthlib.openid.connect.core.request_validator import RequestValidator
 
+from .compat import unquote_plus
 from .exceptions import FatalClientError
 from .models import (
     AbstractApplication,
@@ -238,7 +237,7 @@ class OAuth2Validator(RequestValidator):
         if request.client:
             return request.client.client_type == AbstractApplication.CLIENT_CONFIDENTIAL
 
-        return super().client_authentication_required(request, *args, **kwargs)
+        return super(OAuth2Validator, self).client_authentication_required(request, *args, **kwargs)
 
     def authenticate_client(self, request, *args, **kwargs):
         """
@@ -326,7 +325,7 @@ class OAuth2Validator(RequestValidator):
             return None
 
         # Log an exception when response from auth server is not successful
-        if response.status_code != http.client.OK:
+        if response.ok:
             log.exception(
                 "Introspection: Failed to get a valid response "
                 "from authentication server. Status code: {}, "

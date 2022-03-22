@@ -1,10 +1,9 @@
 import json
-from urllib.parse import parse_qs, urlparse
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.core.urlresolvers import reverse
+from oauth2_provider.compat import reverse, parse_qs, urlparse
 from jwcrypto import jwt
 
 from oauth2_provider.models import get_application_model
@@ -277,7 +276,7 @@ class TestImplicitTokenView(BaseTest):
 @pytest.mark.oauth2_settings(presets.OIDC_SETTINGS_RW)
 class TestOpenIDConnectImplicitFlow(BaseTest):
     def setUp(self):
-        super().setUp()
+        super(TestOpenIDConnectImplicitFlow, self).setUp()
         self.application.algorithm = Application.RS256_ALGORITHM
         self.application.save()
 

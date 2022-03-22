@@ -223,7 +223,7 @@ class TestCustomModels(BaseTestModels):
 
 class TestGrantModel(BaseTestModels):
     def setUp(self):
-        super().setUp()
+        super(TestGrantModel, self).setUp()
         self.application = Application.objects.create(
             name="Test Application",
             redirect_uris="",
@@ -234,7 +234,7 @@ class TestGrantModel(BaseTestModels):
 
     def tearDown(self):
         self.application.delete()
-        super().tearDown()
+        super(TestGrantModel, self).tearDown()
 
     def test_str(self):
         grant = Grant(code="test_code")
@@ -295,7 +295,7 @@ class TestRefreshTokenModel(BaseTestModels):
 @pytest.mark.usefixtures("oauth2_settings")
 class TestClearExpired(BaseTestModels):
     def setUp(self):
-        super().setUp()
+        super(TestClearExpired, self).setUp()
         # Insert many tokens, both expired and not, and grants.
         self.num_tokens = 100
         now = timezone.now()
@@ -314,13 +314,13 @@ class TestClearExpired(BaseTestModels):
             for i in range(self.num_tokens)
         )
         current_access_tokens = AccessToken.objects.bulk_create(
-            AccessToken(token=f"current AccessToken {i}", expires=later) for i in range(self.num_tokens)
+            AccessToken(token="current AccessToken {}".format(i), expires=later) for i in range(self.num_tokens)
         )
         # Give the first half of the access tokens a refresh token,
         # alternating between current and expired ones.
         RefreshToken.objects.bulk_create(
             RefreshToken(
-                token=f"expired AT's refresh token {i}",
+                token="expired AT's refresh token {}".format(i),
                 application=app,
                 access_token=expired_access_tokens[i].pk,
                 user=self.user,
@@ -329,7 +329,7 @@ class TestClearExpired(BaseTestModels):
         )
         RefreshToken.objects.bulk_create(
             RefreshToken(
-                token=f"current AT's refresh token {i}",
+                token="current AT's refresh token {}".format(i),
                 application=app,
                 access_token=current_access_tokens[i].pk,
                 user=self.user,
@@ -340,7 +340,7 @@ class TestClearExpired(BaseTestModels):
         Grant.objects.bulk_create(
             Grant(
                 user=self.user,
-                code=f"old grant code {i}",
+                code="old grant code {}".format(i),
                 application=app,
                 expires=earlier,
                 redirect_uri="https://localhost/redirect",
@@ -350,7 +350,7 @@ class TestClearExpired(BaseTestModels):
         Grant.objects.bulk_create(
             Grant(
                 user=self.user,
-                code=f"new grant code {i}",
+                code="new grant code {}".format(i),
                 application=app,
                 expires=later,
                 redirect_uri="https://localhost/redirect",
@@ -373,11 +373,11 @@ class TestClearExpired(BaseTestModels):
         self.oauth2_settings.CLEAR_EXPIRED_TOKENS_BATCH_SIZE = 10
         self.oauth2_settings.CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL = 0.0
         at_count = AccessToken.objects.count()
-        assert at_count == 2 * self.num_tokens, f"{2 * self.num_tokens} access tokens should exist."
+        assert at_count == 2 * self.num_tokens, "{} access tokens should exist.".format(2 * self.num_tokens)
         rt_count = RefreshToken.objects.count()
-        assert rt_count == self.num_tokens // 2, f"{self.num_tokens // 2} refresh tokens should exist."
+        assert rt_count == self.num_tokens // 2, "{} refresh tokens should exist.".format(self.num_tokens // 2)
         gt_count = Grant.objects.count()
-        assert gt_count == self.num_tokens * 2, f"{self.num_tokens * 2} grants should exist."
+        assert gt_count == self.num_tokens * 2, "{} grants should exist.".format(self.num_tokens * 2)
         clear_expired()
         at_count = AccessToken.objects.count()
         assert at_count == self.num_tokens, "Half the access tokens should not have been deleted."

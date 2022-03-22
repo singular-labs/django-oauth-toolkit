@@ -9,7 +9,6 @@ from oauth2_provider.models import get_access_token_model
 from oauth2_provider.views.generic import ClientProtectedScopedResourceView
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class IntrospectTokenView(ClientProtectedScopedResourceView):
     """
     Implements an endpoint for token introspection based
@@ -20,6 +19,11 @@ class IntrospectTokenView(ClientProtectedScopedResourceView):
     """
 
     required_scopes = ["introspection"]
+
+    # XXX: Django 1.8 compat
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(IntrospectTokenView, self).dispatch(*args, **kwargs)
 
     @staticmethod
     def get_token_response(token_value=None):

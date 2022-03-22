@@ -4,7 +4,7 @@ import datetime
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-from django.core.urlresolvers import reverse
+from oauth2_provider.compat import reverse
 from django.utils import timezone
 
 from oauth2_provider.models import get_access_token_model, get_application_model
@@ -304,7 +304,7 @@ class TestTokenIntrospectionViews(TestCase):
 
     def test_view_post_invalid_client_creds_basic_auth(self):
         """Must fail for invalid client credentials"""
-        auth_headers = get_basic_auth_header(self.application.client_id, f"{CLEARTEXT_SECRET}_so_wrong")
+        auth_headers = get_basic_auth_header(self.application.client_id, "{}_so_wrong".format(CLEARTEXT_SECRET))
         response = self.client.post(
             reverse("oauth2_provider:introspect"), {"token": self.valid_token.token}, **auth_headers
         )
@@ -341,7 +341,7 @@ class TestTokenIntrospectionViews(TestCase):
             {
                 "token": self.valid_token.token,
                 "client_id": self.application.client_id,
-                "client_secret": f"{CLEARTEXT_SECRET}_so_wrong",
+                "client_secret": "{}_so_wrong".format(CLEARTEXT_SECRET),
             },
         )
         self.assertEqual(response.status_code, 403)

@@ -1,10 +1,9 @@
 from types import SimpleNamespace
-from urllib.parse import parse_qs, urlparse
 
 import pytest
 from django.conf import settings as test_settings
 from django.contrib.auth import get_user_model
-from django.core.urlresolvers import reverse
+from oauth2_provider.compat import reverse, parse_qs, urlparse
 from jwcrypto import jwk
 
 from oauth2_provider.models import get_application_model
@@ -19,7 +18,7 @@ UserModel = get_user_model()
 CLEARTEXT_SECRET = "1234567890abcdefghijklmnopqrstuvwxyz"
 
 
-class OAuthSettingsWrapper:
+class OAuthSettingsWrapper(object):
     """
     A wrapper around oauth2_settings to ensure that when an overridden value is
     set, it also records it in _cached_attrs, so that the settings can be reset.
@@ -39,7 +38,7 @@ class OAuthSettingsWrapper:
 
     def __setattr__(self, attr, value):
         if attr == "settings":
-            super().__setattr__(attr, value)
+            super(OAuthSettingsWrapper, self).__setattr__(attr, value)
         else:
             setattr(_oauth2_settings, attr, value)
             _oauth2_settings._cached_attrs.add(attr)

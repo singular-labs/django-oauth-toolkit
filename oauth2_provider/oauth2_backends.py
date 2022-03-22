@@ -1,16 +1,16 @@
 import json
-from urllib.parse import urlparse, urlunparse
 
 from oauthlib import oauth2
 from oauthlib.common import Request as OauthlibRequest
 from oauthlib.common import quote, urlencode, urlencoded
 from oauthlib.oauth2 import OAuth2Error
 
+from .compat import urlparse, urlunparse
 from .exceptions import FatalClientError, OAuthToolkitError
 from .settings import oauth2_settings
 
 
-class OAuthLibCore:
+class OAuthLibCore(object):
     """
     Wrapper for oauth Server providing django-specific interfaces.
 

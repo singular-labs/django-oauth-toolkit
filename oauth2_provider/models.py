@@ -2,30 +2,24 @@ import logging
 import time
 import uuid
 from datetime import timedelta
-import sys
 
 from django.apps import apps
 from django.conf import settings
 from django.contrib.auth.hashers import identify_hasher, make_password
 from django.core.exceptions import ImproperlyConfigured
 from django.db import models, transaction
-from django.core.urlresolvers import reverse
+from .compat import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jwcrypto import jwk
 from jwcrypto.common import base64url_encode
 from oauthlib.oauth2.rfc6749 import errors
 
+from .compat import parse_qsl, urlparse
 from .generators import generate_client_id, generate_client_secret
 from .scopes import get_scopes_backend
 from .settings import oauth2_settings
 from .validators import RedirectURIValidator, WildcardSet
-
-PY2 = sys.version_info[0] == 2
-if PY2:
-    from urlparse import parse_qsl, urlparse
-else:
-    from urllib.parse import parse_qsl, urlparse
 
 
 logger = logging.getLogger(__name__)
@@ -36,13 +30,13 @@ class ClientSecretField(models.CharField):
         secret = getattr(model_instance, self.attname)
         try:
             hasher = identify_hasher(secret)
-            logger.debug(f"{model_instance}: {self.attname} is already hashed with {hasher}.")
+            logger.debug("{model_instance}: {self.attname} is already hashed with {hasher}.".format(**locals()))
         except ValueError:
-            logger.debug(f"{model_instance}: {self.attname} is not hashed; hashing it now.")
+            logger.debug("{model_instance}: {self.attname} is not hashed; hashing it now.".format(**locals()))
             hashed_secret = make_password(secret)
             setattr(model_instance, self.attname, hashed_secret)
             return hashed_secret
-        return super().pre_save(model_instance, add)
+        return super(ClientSecretField, self).pre_save(model_instance, add)
 
 
 class AbstractApplication(models.Model):
@@ -657,7 +651,7 @@ def clear_expired():
             batch_length = flat_queryset.count()
             queryset.model.objects.filter(id__in=list(flat_queryset)).delete()
             temp_result = current_no - batch_length
-            logger.debug("{batch_length} tokens deleted, {temp_result} left".format(locals()))
+            logger.debug("{batch_length} tokens deleted, {temp_result} left".format(**locals()))
             queryset = queryset.model.objects.filter(query)
             time.sleep(CLEAR_EXPIRED_TOKENS_BATCH_INTERVAL)
             current_no = queryset.count()

@@ -1,13 +1,12 @@
 import json
-from urllib.parse import urlparse
 
 from django.http import HttpResponse, JsonResponse
-from django.core.urlresolvers import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import View
 from jwcrypto import jwk
 
+from ..compat import reverse, urlparse
 from ..models import get_application_model
 from ..settings import oauth2_settings
 from .mixins import OAuthLibMixin, OIDCOnlyMixin
@@ -79,8 +78,7 @@ class JwksInfoView(OIDCOnlyMixin, View):
         if oauth2_settings.OIDC_RSA_PRIVATE_KEY:
             for pem in [
                 oauth2_settings.OIDC_RSA_PRIVATE_KEY,
-                *oauth2_settings.OIDC_RSA_PRIVATE_KEYS_INACTIVE,
-            ]:
+                ] + oauth2_settings.OIDC_RSA_PRIVATE_KEYS_INACTIVE:
 
                 key = jwk.JWK.from_pem(pem.encode("utf8"))
                 data = {"alg": "RS256", "use": "sig", "kid": key.thumbprint()}
@@ -90,18 +88,22 @@ class JwksInfoView(OIDCOnlyMixin, View):
         response["Access-Control-Allow-Origin"] = "*"
         response["Cache-Control"] = (
             "Cache-Control: public, "
-            + f"max-age={oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS}, "
-            + f"stale-while-revalidate={oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS}, "
-            + f"stale-if-error={oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS}"
+            + "max-age={}, ".format(oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS)
+            + "stale-while-revalidate={}, ".format(oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS)
+            + "stale-if-error={}".format(oauth2_settings.OIDC_JWKS_MAX_AGE_SECONDS)
         )
         return response
 
 
-@method_decorator(csrf_exempt, name="dispatch")
 class UserInfoView(OIDCOnlyMixin, OAuthLibMixin, View):
     """
     View used to show Claims about the authenticated End-User
     """
+
+    # XXX: Django 1.8 compat
+    @method_decorator(csrf_exempt)
+    def dispatch(self, *args, **kwargs):
+        return super(UserInfoView, self).dispatch(*args, **kwargs)
 
     def get(self, request, *args, **kwargs):
         return self._create_userinfo_response(request)

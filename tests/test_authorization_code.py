@@ -3,12 +3,11 @@ import datetime
 import hashlib
 import json
 import re
-from urllib.parse import parse_qs, urlparse
 
 import pytest
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
-from django.core.urlresolvers import reverse
+from oauth2_provider.compat import reverse, parse_qs, urlparse
 from django.utils import timezone
 from django.utils.crypto import get_random_string
 from jwcrypto import jwt
@@ -1622,7 +1621,7 @@ class TestAuthorizationCodeTokenView(BaseAuthorizationCodeTokenView):
 @pytest.mark.oauth2_settings(presets.OIDC_SETTINGS_RW)
 class TestOIDCAuthorizationCodeTokenView(BaseAuthorizationCodeTokenView):
     def setUp(self):
-        super().setUp()
+        super(TestOIDCAuthorizationCodeTokenView, self).setUp()
         self.application.algorithm = Application.RS256_ALGORITHM
         self.application.save()
 
@@ -1699,7 +1698,7 @@ class TestOIDCAuthorizationCodeTokenView(BaseAuthorizationCodeTokenView):
 @pytest.mark.oauth2_settings(presets.OIDC_SETTINGS_RW)
 class TestOIDCAuthorizationCodeHSAlgorithm(BaseAuthorizationCodeTokenView):
     def setUp(self):
-        super().setUp()
+        super(TestOIDCAuthorizationCodeHSAlgorithm, self).setUp()
         self.oauth2_settings.OIDC_RSA_PRIVATE_KEY = None
         self.application.algorithm = Application.HS256_ALGORITHM
         self.application.save()
@@ -1795,7 +1794,7 @@ class TestAuthorizationCodeProtectedResource(BaseTest):
 @pytest.mark.oauth2_settings(presets.OIDC_SETTINGS_RW)
 class TestOIDCAuthorizationCodeProtectedResource(BaseTest):
     def setUp(self):
-        super().setUp()
+        super(TestOIDCAuthorizationCodeProtectedResource, self).setUp()
         self.application.algorithm = Application.RS256_ALGORITHM
         self.application.save()
 
