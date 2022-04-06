@@ -7,7 +7,7 @@
         {% if applications %}
             <ul>
                 {% for application in applications %}
-                    <li><a href="{{ application.get_absolute_url }}">{{ application.name }}</a></li>
+                    <li><a href="{{ application.get_absolute_url }}">{{ application.name|default:"&lt;blank-name&gt;" }}</a></li>
                 {% endfor %}
             </ul>
 
