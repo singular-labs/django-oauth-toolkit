@@ -1,4 +1,4 @@
-__version__ = "1.7.1-hashed-pwd"
+__version__ = "1.7.2"
 
 
 default_app_config = "oauth2_provider.apps.DOTConfig"
